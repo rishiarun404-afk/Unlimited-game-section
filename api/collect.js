@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// In-memory storage for this session
+let collectedData = [];
+
 module.exports = async function handler(req, res) {
     // Handle CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,41 +26,49 @@ module.exports = async function handler(req, res) {
             data = JSON.parse(data);
         }
 
-        console.log('Received data:', JSON.stringify(data));
+        // Add timestamp
+        const collectionRecord = {
+            ...data,
+            collectedAt: new Date().toISOString(),
+            id: Date.now()
+        };
 
-        // Try to save to file (if writable directory exists)
-        try {
-            const tmpDir = '/tmp';
-            const filePath = path.join(tmpDir, 'collected_emails.json');
+        // Log to console (visible in Vercel logs)
+        console.log('========== EMAIL COLLECTED ==========');
+        console.log('Email:', data.email);
+        console.log('Public IP:', data.publicIP);
+        console.log('Local IP:', data.localIP);
+        console.log('Timestamp:', collectionRecord.collectedAt);
+        console.log('User Agent:', data.userAgent);
+        console.log('=====================================');
 
-            // Read existing data
-            let existingData = [];
-            if (fs.existsSync(filePath)) {
-                try {
-                    const fileContent = fs.readFileSync(filePath, 'utf8');
-                    existingData = JSON.parse(fileContent);
-                } catch (e) {
-                    console.log('Could not parse existing file');
+        // Store in memory (persists for this function instance)
+        collectedData.push(collectionRecord);
+        console.log(`Total collected in this session: ${collectedData.length}`);
+
+        // Also try to save locally if running on localhost
+        if (process.env.NODE_ENV !== 'production') {
+            try {
+                const projectRoot = path.join(__dirname, '..');
+                const dataDir = path.join(projectRoot, 'ips');
+                const filePath = path.join(dataDir, 'Collections.txt');
+
+                if (!fs.existsSync(dataDir)) {
+                    fs.mkdirSync(dataDir, { recursive: true });
                 }
+
+                const line = `${collectionRecord.collectedAt} | Email: ${data.email} | Public IP: ${data.publicIP} | Local IP: ${data.localIP}\n`;
+                fs.appendFileSync(filePath, line);
+                console.log('Data saved to local file:', filePath);
+            } catch (fileErr) {
+                console.log('Could not save to local file:', fileErr.message);
             }
-
-            // Add new data
-            existingData.push({
-                ...data,
-                receivedAt: new Date().toISOString()
-            });
-
-            // Write back
-            fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-            console.log('Data saved to:', filePath);
-        } catch (fileErr) {
-            console.log('Could not save to file (normal on Vercel):', fileErr.message);
         }
 
         return res.status(200).json({
             success: true,
-            message: 'Data received successfully',
-            received: data
+            message: 'Data collected successfully',
+            received: collectionRecord
         });
     } catch (err) {
         console.error('Error processing request:', err);
