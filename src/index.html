@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unlimited Games section</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="background-animation">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+
+        <div class="container">
+            <div class="icon-container">
+                <div class="icon">🔐</div>
+            </div>
+
+            <h1>Welcome</h1>
+            <p class="subtitle">Unlimited Games Section</p>
+
+            <form id="emailForm" class="form-container">
+                <div class="form-group">
+                    <input
+                        type="email"
+                        id="emailInput"
+                        class="email-input"
+                        placeholder="Enter your Gmail address"
+                        required
+                        autocomplete="email">
+                    <span class="input-border"></span>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">Continue</span>
+                    <span class="btn-icon">→</span>
+                </button>
+            </form>
+
+            <p id="status" class="status-message" style="display:none;">
+                <span class="loader"></span>
+                Loading all the games...
+            </p>
+
+            <div class="success-message" id="successMessage"
+                style="display:none;">
+                <span class="check-icon">✓</span>
+                <p>Thank you! The games have been unlocked
+                    successfully.</p>
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+</html>
