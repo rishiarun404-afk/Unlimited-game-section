@@ -1,14 +1,31 @@
 module.exports = function handler(req, res) {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
     try {
-        const username = process.env.USER || process.env.USERNAME || 'user';
+        const username = process.env.USER || process.env.USERNAME || 'GameUser';
+
+        console.log('System info requested for user:', username);
 
         return res.status(200).json({
+            success: true,
             email: `${username}@gmail.com`,
             username: username,
-            message: 'System info retrieved'
+            timestamp: new Date().toISOString()
         });
     } catch (error) {
-        console.error('Error getting system info:', error.message);
-        return res.status(500).json({ error: 'Internal server error', details: error.message });
+        console.error('Error in system-info handler:', error);
+        return res.status(500).json({
+            error: 'Internal server error',
+            message: error.message || 'Unknown error'
+        });
     }
 };

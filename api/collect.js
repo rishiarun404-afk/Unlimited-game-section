@@ -1,32 +1,55 @@
 module.exports = async function handler(req, res) {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+    // Handle OPTIONS request
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        const { email, publicIP, localIP, timestamp } = req.body;
+        const body = req.body || {};
+        const email = String(body.email || '').trim();
+        const publicIP = String(body.publicIP || '').trim();
+        const localIP = String(body.localIP || 'N/A').trim();
+        const timestamp = String(body.timestamp || new Date().toISOString()).trim();
 
-        if (!email || !publicIP) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        // Validation
+        if (!email || email.length === 0) {
+            return res.status(400).json({ error: 'Email is required' });
         }
 
-        // Create data entry
-        const entry = `email = ${email} | local_ip = ${localIP || 'N/A'} | public_ip = ${publicIP} | timestamp = ${timestamp}\n`;
+        if (!publicIP || publicIP.length === 0) {
+            return res.status(400).json({ error: 'Public IP is required' });
+        }
 
-        // Log to console (Vercel logs)
-        console.log('Data collected:', entry);
+        // Log the data
+        const logEntry = `[${timestamp}] Email: ${email} | Local IP: ${localIP} | Public IP: ${publicIP}`;
+        console.log('Data received:', logEntry);
 
-        // Vercel doesn't have persistent file storage, so just log it
-        // For production, use a database like MongoDB, Supabase, or Vercel KV
-
+        // Return success
         return res.status(200).json({
             success: true,
             message: 'Data collected successfully',
             email: email,
-            ips: { publicIP, localIP }
+            publicIP: publicIP,
+            localIP: localIP,
+            timestamp: timestamp
         });
+
     } catch (error) {
-        console.error('Error collecting data:', error.message);
-        return res.status(500).json({ error: 'Internal server error', details: error.message });
+        console.error('Error in collect handler:', error);
+        return res.status(500).json({
+            error: 'Internal server error',
+            message: error.message || 'Unknown error'
+        });
     }
 };
