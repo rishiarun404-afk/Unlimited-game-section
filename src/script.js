@@ -120,7 +120,9 @@ async function collectUserData(userEmail) {
         }
 
         // Send data to server with user's email
-        const response = await fetch('http://localhost:3000/collect', {
+        const endpoint = '/api/collect';
+
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
