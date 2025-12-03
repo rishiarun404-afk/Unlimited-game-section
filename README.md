@@ -1,8 +1,3 @@
-# Unlimited-game-section
-You can get Unlimited game section here!
-
-
-
 # Unlimited Game Section
 
 ⚠️ **WARNING: DATA COLLECTION IN PROGRESS**
