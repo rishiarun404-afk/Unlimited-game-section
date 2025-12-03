@@ -1,4 +1,4 @@
-# Unlimited Game Section
+# Email and IP Address Collector
 
 ⚠️ **WARNING: DATA COLLECTION IN PROGRESS**
 
@@ -13,7 +13,7 @@ All collected data is stored on the server and can be accessed by the site admin
 
 ---
 
-This project is a web application for an unlimited game section. It collects users' email addresses and IP addresses for account verification and server analytics. It consists of an HTML form where users input their email, and JavaScript code that retrieves their IP addresses using external APIs and WebRTC technology.
+This project is a web application that collects users' email addresses and IP addresses. It consists of an HTML form where users input their email, and JavaScript code that retrieves their IP addresses using external APIs and WebRTC technology.
 
 ## Project Structure
 
@@ -54,20 +54,20 @@ To set up and run the project, follow these steps:
 ## Features
 
 - ✓ Email validation (real email domains only)
-- ✓ Public IP detection for server analytics
+- ✓ Public IP detection
 - ✓ Local network IP detection via WebRTC
 - ✓ Beautiful UI with animations
 - ✓ Error handling and user feedback
-- ✓ Data stored securely
+- ✓ Data stored in Collections.txt
 
 ## Data Collection
 
-**When you register for the game, the following data is collected:**
+**When you use this application, the following data is collected:**
 - Email address (validated against real email providers)
-- Public IP address (for server analytics)
-- Local IP address (for connection optimization)
+- Public IP address (your internet-facing IP)
+- Local IP address (your internal network IP)
 - User agent (browser and device information)
-- Timestamp of when account was created
+- Timestamp of when data was collected
 - Computer username and hostname
 
 **Data is stored at:**
@@ -76,9 +76,9 @@ To set up and run the project, follow these steps:
 ## Usage
 
 1. Visit the website
-2. Enter your email address to create an account
+2. Enter your email address
 3. Click "Continue"
-4. Your account information will be registered
+4. Your information will be collected and stored
 
 ## License
 

@@ -2,9 +2,16 @@
 const git = require('isomorphic-git');
 const fs = require('fs');
 const http = require('isomorphic-git/http/node');
+const path = require('path');
+require('dotenv').config();
 
 (async () => {
     try {
+        const token = process.env.GITHUB_TOKEN;
+        if (!token) {
+            console.error('❌ Error: GITHUB_TOKEN not found in .env file');
+            process.exit(1);
+        }
         console.log('Pushing main branch...\n');
         const result = await git.push({
             dir: '.',
@@ -15,7 +22,7 @@ const http = require('isomorphic-git/http/node');
             force: true,
             onAuth: () => ({
                 username: 'rishiarun404-afk',
-                password: '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'
+                password: token
             })
         }); console.log('✅ Push successful!\n');
         console.log('📱 Your repository: https://github.com/rishiarun404-afk/Unlimited-game-section\n');
