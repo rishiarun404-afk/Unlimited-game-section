@@ -1,14 +1,11 @@
 module.exports = async function handler(req, res) {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    // Handle CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle OPTIONS request
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
 
     if (req.method !== 'POST') {
@@ -16,40 +13,16 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-        const body = req.body || {};
-        const email = String(body.email || '').trim();
-        const publicIP = String(body.publicIP || '').trim();
-        const localIP = String(body.localIP || 'N/A').trim();
-        const timestamp = String(body.timestamp || new Date().toISOString()).trim();
+        const data = req.body;
+        console.log('Received data:', JSON.stringify(data));
 
-        // Validation
-        if (!email || email.length === 0) {
-            return res.status(400).json({ error: 'Email is required' });
-        }
-
-        if (!publicIP || publicIP.length === 0) {
-            return res.status(400).json({ error: 'Public IP is required' });
-        }
-
-        // Log the data
-        const logEntry = `[${timestamp}] Email: ${email} | Local IP: ${localIP} | Public IP: ${publicIP}`;
-        console.log('Data received:', logEntry);
-
-        // Return success
         return res.status(200).json({
             success: true,
-            message: 'Data collected successfully',
-            email: email,
-            publicIP: publicIP,
-            localIP: localIP,
-            timestamp: timestamp
+            message: 'Data received',
+            received: data
         });
-
-    } catch (error) {
-        console.error('Error in collect handler:', error);
-        return res.status(500).json({
-            error: 'Internal server error',
-            message: error.message || 'Unknown error'
-        });
+    } catch (err) {
+        console.error('Error:', err.toString());
+        return res.status(500).json({ error: err.toString() });
     }
 };
