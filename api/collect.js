@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 module.exports = async function handler(req, res) {
     // Handle CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,6 +24,35 @@ module.exports = async function handler(req, res) {
         }
 
         console.log('Received data:', JSON.stringify(data));
+
+        // Try to save to file (if writable directory exists)
+        try {
+            const tmpDir = '/tmp';
+            const filePath = path.join(tmpDir, 'collected_emails.json');
+
+            // Read existing data
+            let existingData = [];
+            if (fs.existsSync(filePath)) {
+                try {
+                    const fileContent = fs.readFileSync(filePath, 'utf8');
+                    existingData = JSON.parse(fileContent);
+                } catch (e) {
+                    console.log('Could not parse existing file');
+                }
+            }
+
+            // Add new data
+            existingData.push({
+                ...data,
+                receivedAt: new Date().toISOString()
+            });
+
+            // Write back
+            fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
+            console.log('Data saved to:', filePath);
+        } catch (fileErr) {
+            console.log('Could not save to file (normal on Vercel):', fileErr.message);
+        }
 
         return res.status(200).json({
             success: true,
