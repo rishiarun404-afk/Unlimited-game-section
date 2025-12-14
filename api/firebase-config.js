@@ -3,16 +3,45 @@
 
 const admin = require('firebase-admin');
 
+let firebaseInitialized = false;
+
 // Check if Firebase is already initialized
 if (!admin.apps.length) {
-    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-        ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-        : {
-            // Fallback for local development - replace with your actual credentials
+    try {
+        // Get private key from environment and normalize newlines
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+        if (!privateKey) {
+            throw new Error('FIREBASE_PRIVATE_KEY environment variable is missing');
+        }
+
+        // Check if it's base64 encoded (doesn't contain the BEGIN PRIVATE KEY marker)
+        if (!privateKey.includes('BEGIN PRIVATE KEY') && !privateKey.includes('BEGIN RSA PRIVATE KEY')) {
+            try {
+                // Try to decode from base64
+                privateKey = Buffer.from(privateKey, 'base64').toString('utf-8');
+                console.log('📦 Private key decoded from base64');
+            } catch (e) {
+                // Not base64, assume it's already in plain text
+                console.log('📝 Private key is plain text');
+            }
+        }
+
+        // Handle escaped newlines from environment variables
+        if (typeof privateKey === 'string') {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+
+        // Verify it has the proper markers
+        if (!privateKey.includes('BEGIN PRIVATE KEY')) {
+            throw new Error('Private key does not contain BEGIN PRIVATE KEY marker after processing');
+        }
+
+        const serviceAccountKey = {
             type: "service_account",
             project_id: process.env.FIREBASE_PROJECT_ID,
             private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-            private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            private_key: privateKey,
             client_email: process.env.FIREBASE_CLIENT_EMAIL,
             client_id: process.env.FIREBASE_CLIENT_ID,
             auth_uri: "https://accounts.google.com/o/oauth2/auth",
@@ -21,15 +50,26 @@ if (!admin.apps.length) {
             client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
         };
 
-    try {
+        console.log('🔍 Firebase initialization check:');
+        console.log('  - Project ID:', serviceAccountKey.project_id ? 'SET ✓' : 'MISSING ✗');
+        console.log('  - Private Key ID:', serviceAccountKey.private_key_id ? 'SET ✓' : 'MISSING ✗');
+        console.log('  - Client Email:', serviceAccountKey.client_email ? 'SET ✓' : 'MISSING ✗');
+        console.log('  - Database URL:', process.env.FIREBASE_DATABASE_URL ? 'SET ✓' : 'MISSING ✗');
+
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccountKey),
-            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://your-project.firebaseio.com"
+            databaseURL: process.env.FIREBASE_DATABASE_URL
         });
-        console.log('Firebase initialized successfully');
+        firebaseInitialized = true;
+        console.log('✅ Firebase initialized successfully');
     } catch (err) {
-        console.error('Firebase initialization error:', err.message);
+        firebaseInitialized = false;
+        console.error('❌ Firebase initialization failed:', err.message);
+        console.error('Stack trace:', err.stack);
     }
+} else {
+    firebaseInitialized = true;
+    console.log('✅ Firebase already initialized');
 }
 
-module.exports = admin;
+module.exports = firebaseInitialized ? admin : null;
