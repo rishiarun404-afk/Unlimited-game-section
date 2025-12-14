@@ -1,4 +1,15 @@
 {
-    "buildCommand": "npm install",
-    "outputDirectory": "src"
+    "public": true,
+    "buildCommand": "",
+    "outputDirectory": "src",
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/$1"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
 }

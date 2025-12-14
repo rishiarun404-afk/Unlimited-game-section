@@ -120,9 +120,7 @@ async function collectUserData(userEmail) {
         }
 
         // Send data to server with user's email
-        const endpoint = window.location.hostname === 'localhost'
-            ? 'http://localhost:3000/collect'
-            : '/api/collect';
+        const endpoint = '/api/collect';
 
         const response = await fetch(endpoint, {
             method: 'POST',
